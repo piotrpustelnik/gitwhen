@@ -1,0 +1,23 @@
+# Build output
+/build/
+*.o
+*.out
+*.exe
+
+# Editors
+*.swp
+*.swo
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Debug files
+core
+vgcore.*
+*.log
+
+# Backup files
+*.bak
+*.tmp
