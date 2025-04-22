@@ -1,3 +1,6 @@
+#include "finder.h"
+#include "gitwrap.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,13 +49,19 @@ int main(int argc, char *argv[]) {
     }
 
     // If only one date is provided, use that as the end date (for a single day search)
-    if (end_date == NULL) {
-        end_date = start_date;
-    }
+    // if (end_date == NULL) {
+    //     end_date = start_date;
+    // }
 
     // Find all Git repositories in the specified directory
     size_t num_repos = 0;
-    char **repos = find_repos(dir_path, &num_repos);
+    
+    // TODO: figure out how to do dynamically
+    char** repos = malloc(100 * sizeof(char *)); // Array of 100 string pointers;
+
+    // TODO: add if malloc fails
+    
+    find_repos(repos, dir_path, &num_repos);
 
     if (repos == NULL) {
         fprintf(stderr, "Error: Failed to find Git repositories in directory '%s'\n", dir_path);
@@ -62,6 +71,13 @@ int main(int argc, char *argv[]) {
     if (num_repos == 0) {
         printf("No Git repositories found in the specified directory.\n");
     } else {
+        // Delete git.txt file if it exists
+        if (access("git.txt", F_OK) == 0) {
+            if (remove("git.txt") != 0) {
+            perror("Error deleting git.txt");
+            return 1;
+            }
+        }
         // For each repository found, print commits between the start and end date
         for (size_t i = 0; i < num_repos; i++) {
             printf("Processing repository: %s\n", repos[i]);
@@ -70,7 +86,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Free the allocated memory for the repository paths
-    free_repo_list(repos, num_repos);
+    free(repos);
 
     return 0;
 }

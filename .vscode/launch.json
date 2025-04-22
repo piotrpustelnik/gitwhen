@@ -8,8 +8,8 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/gitwhen",
-            "args": [],
+            "program": "${workspaceFolder}/build/debug/gitwhen",
+            "args": ["--directory", "/home/piotr/projects/gitwhen", "2025-04-21"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
@@ -26,7 +26,8 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            "preLaunchTask": "build",
         }
 
     ]

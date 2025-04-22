@@ -2,6 +2,7 @@
     "files.associations": {
         "finder.h": "c",
         "string.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stddef.h": "c"
     }
 }
