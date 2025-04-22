@@ -1,20 +1,14 @@
-// src/main.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>  // For getcwd()
-#include "finder.h"
-#include "gitwrap.h"
+#include <unistd.h>  // For getcwd
 
-void print_usage(const char *prog_name) {
-    printf("Usage: %s [--directory <path>] <start-date> [end-date]\n", prog_name);
-    printf("  <start-date>     : The start date for commit search (e.g., 2025-04-22)\n");
-    printf("  [end-date]       : Optional end date for commit search (e.g., 2025-04-23)\n");
-    printf("  --directory <path>: Optional directory to search in (defaults to current directory)\n");
+void print_usage(const char *program_name) {
+    printf("Usage: %s [--directory <path>] <start_date> [end_date]\n", program_name);
 }
 
 int main(int argc, char *argv[]) {
-    // Default directory path to the current working directory
+    // Default directory path to NULL
     const char *dir_path = NULL;
     const char *start_date = NULL;
     const char *end_date = NULL;
@@ -40,21 +34,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // If no start date is provided, print usage and exit
-    if (start_date == NULL) {
-        fprintf(stderr, "Error: Missing start date\n");
-        print_usage(argv[0]);
-        return 1;
-    }
-
-    // If no directory is provided, use the current working directory
-    if (dir_path == NULL) {
-        char cwd[4096];
+     // If no directory path provided, set it to the current working directory
+     if (dir_path == NULL) {
+        // Get the current working directory using getcwd
+        char cwd[1024];
         if (getcwd(cwd, sizeof(cwd)) == NULL) {
             perror("getcwd");
             return 1;
         }
-        dir_path = cwd;
+        dir_path = cwd;  // Set dir_path to the current directory
     }
 
     // If only one date is provided, use that as the end date (for a single day search)
