@@ -1,29 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <errno.h>
+#include <ctype.h>
 
 void run_git_log(const char *repo_path, const char *start_date, const char *end_date) {
     char command[1024];
 
-    // Create the git.txt file and write the repository path at the beginning
-    FILE *file = fopen("git.txt", "w");
-    if (file == NULL) {
-        perror("Failed to open git.txt for writing");
-        return;
-    }
-
-    // Write the repo path into the file with header
-    fprintf(file, "==================== GIT LOG ====================\n");
-    fprintf(file, "Repository: %s\n\n", repo_path);
-
-    // Create a header for the commit logs
-    fprintf(file, "%-10s %-12s %-50s\n", "Commit", "Date", "Message");
-    fprintf(file, "--------------------------------------------------\n");
-    fclose(file);
-
-    // Build the base command for git log with escaped % symbols
+    // Build the base command for git log
     int written = snprintf(command, sizeof(command),
         "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short",
         repo_path);
@@ -32,7 +15,7 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
         return;
     }
 
-    // Append optional dates
+    // Append optional date filters
     if (start_date) {
         written += snprintf(command + written, sizeof(command) - written,
                             " --since=\"%s\"", start_date);
@@ -43,30 +26,44 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
                             " --until=\"%s\"", end_date);
     }
 
-    // Append file redirection to the command to append output to git.txt
-    snprintf(command + strlen(command), sizeof(command) - strlen(command), 
-             " >> git.txt");
-
-    // Print the final command to ensure it's correct
-    printf("Running command: %s\n", command);
-
-    // Execute the git log command and append the output to git.txt
-    int status = system(command);
-    if (status == -1) {
-        perror("Failed to run command");
+    // Open the command as a pipe
+    FILE *fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("Failed to run git log");
         return;
     }
 
+    // Read all output into a dynamic buffer
+    char buffer[1024];
+    char *output = NULL;
+    size_t total_length = 0;
 
-    // Reopen the file to append the commit logs
-    file = fopen("git.txt", "a");
-    if (file == NULL) {
-        perror("Failed to open git.txt for appending");
-        return;
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        size_t len = strlen(buffer);
+        char *new_output = realloc(output, total_length + len + 1);
+        if (!new_output) {
+            perror("Failed to allocate memory");
+            free(output);
+            pclose(fp);
+            return;
+        }
+        output = new_output;
+        memcpy(output + total_length, buffer, len);
+        total_length += len;
+        output[total_length] = '\0';
     }
 
-    // Add space for clarity
-    fprintf(file, "\n====================================================\n");
+    pclose(fp);
 
-    fclose(file);
+    // Only print if there was actual output
+    if (output && total_length > 0) {
+        printf("==================== GIT LOG ====================\n");
+        printf("Repository: %s\n\n", repo_path);
+        printf("%-10s %-12s %-50s\n", "Commit", "Date", "Message");
+        printf("--------------------------------------------------\n");
+        printf("%s", output);
+        printf("\n====================================================\n\n");
+    }
+
+    free(output);
 }

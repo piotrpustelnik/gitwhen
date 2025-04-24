@@ -1,8 +1,0 @@
-==================== GIT LOG ====================
-Repository: /home/piotr/projects/gitwhen
-
-Commit     Date         Message                                           
---------------------------------------------------
-7ed1bfa 2025-04-24 stop tracking vscode folder
-43da245 2025-04-24 add dynamic string array module
-====================================================
