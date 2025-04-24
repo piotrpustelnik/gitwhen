@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
     // For each repository found, print commits between the start and end date
     for (size_t i = 0; i < repos_arr->size; i++)
     {
-        printf("Processing repository: %s\n", repos_arr->data[i]);
+        // printf("Processing repository: %s\n", repos_arr->data[i]);
         run_git_log(repos_arr->data[i], start_date, end_date);
     }
 

@@ -88,13 +88,13 @@ int find_repos(StringArray *arr, const char *dir_path) {
         // Build the full path for the current entry
         snprintf(new_dir, sizeof(new_dir), "%s/%s", dir_path, entry->d_name);
 
-        printf("Checking directory: %s\n", dir_path);
+        // printf("Checking directory: %s\n", dir_path);
 
         struct stat statbuf;
         if (stat(new_dir, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
             // Check if it's a Git repo
             if (is_git_path(new_dir)) {
-                printf("Found git directory: %s\n", new_dir);
+                // printf("Found git directory: %s\n", new_dir);
                 append(arr, get_parent_path(new_dir));
             }
 
