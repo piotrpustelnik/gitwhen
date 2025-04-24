@@ -3,20 +3,17 @@
 #include <string.h>
 #include <ctype.h>
 
-// ANSI escape codes for colors
-#define RESET_COLOR      "\x1b[0m"
-#define BOLD_BLUE        "\x1b[1;34m"
-#define GREEN            "\x1b[32m"
-#define YELLOW           "\x1b[33m"
-#define RED              "\x1b[31m"
-#define BOLD_WHITE       "\x1b[1;37m"
-#define BOLD_CYAN        "\x1b[1;36m"
+#define COLOR_RESET   "\x1b[0m"
+#define COLOR_HEADER  "\x1b[1;36m"
+#define COLOR_REPO    "\x1b[1;33m"
+#define COLOR_COMMIT  "\x1b[1;32m"
+#define COLOR_DATE    "\x1b[1;35m"
+#define COLOR_MESSAGE "\x1b[1;37m"
 
-// Function to run git log and print it nicely formatted
 void run_git_log(const char *repo_path, const char *start_date, const char *end_date) {
+    static int header_printed = 0;
     char command[1024];
 
-    // Build the base command for git log
     int written = snprintf(command, sizeof(command),
         "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short",
         repo_path);
@@ -25,7 +22,6 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
         return;
     }
 
-    // Append optional date filters
     if (start_date) {
         written += snprintf(command + written, sizeof(command) - written,
                             " --since=\"%s\"", start_date);
@@ -36,14 +32,12 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
                             " --until=\"%s\"", end_date);
     }
 
-    // Open the command as a pipe
     FILE *fp = popen(command, "r");
     if (fp == NULL) {
         perror("Failed to run git log");
         return;
     }
 
-    // Read all output into a dynamic buffer
     char buffer[1024];
     char *output = NULL;
     size_t total_length = 0;
@@ -65,19 +59,37 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
 
     pclose(fp);
 
-    // Only print if there was actual output
     if (output && total_length > 0) {
-        // Printing headers with color
-        printf(BOLD_CYAN "==================== GIT LOG ====================\n" RESET_COLOR);
-        printf(GREEN "Repository: " BOLD_WHITE "%s\n\n", repo_path);
-        printf(BOLD_BLUE "%-10s %-12s %-50s\n", "Commit", "Date", "Message");
-        printf(RESET_COLOR "--------------------------------------------------\n");
+        const char *hline = "┌──────────────────────────────────────────────────────────────────────────────┐";
+        const char *mline = "├──────────────────────────────────────────────────────────────────────────────┤";
+        const char *bline = "└──────────────────────────────────────────────────────────────────────────────┘";
 
-        // Print the output with a color for each line
-        printf("%s", output);
+        if (!header_printed) {
+            printf("%s\n", hline);
+            printf("│ %s%-76s%s │\n", COLOR_HEADER, "GIT LOG", COLOR_RESET);
+            printf("%s\n", mline);
+            header_printed = 1;
+        }
 
-        // Printing footer with color
-        printf(RESET_COLOR "\n====================================================\n\n");
+        printf("│ %sRepository:%s %-62s │\n", COLOR_REPO, COLOR_RESET, repo_path);
+        printf("│ %-10s %-12s %-50s │\n", "Commit", "Date", "Message");
+        printf("│ %-10s %-12s %-50s │\n", "------", "----------", "--------------------------------------------------");
+
+        char *line = strtok(output, "\n");
+        while (line != NULL) {
+            char commit[16], date[16], message[256];
+            if (sscanf(line, "%15s %15s %[^\n]", commit, date, message) == 3) {
+                printf("│ %s%-10s%s %s%-12s%s %s%-50.50s%s │\n",
+                    COLOR_COMMIT, commit, COLOR_RESET,
+                    COLOR_DATE, date, COLOR_RESET,
+                    COLOR_MESSAGE, message, COLOR_RESET);
+            } else {
+                printf("│ %s%-76s%s │\n", COLOR_MESSAGE, line, COLOR_RESET);
+            }
+            line = strtok(NULL, "\n");
+        }
+
+        printf("%s\n\n", bline);
     }
 
     free(output);
