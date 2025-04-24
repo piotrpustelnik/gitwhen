@@ -1,17 +1,18 @@
-#ifndef STRING_ARRAY_H
-#define STRING_ARRAY_H
+// dynamic_array.h
+#ifndef DYNAMIC_ARRAY_H
+#define DYNAMIC_ARRAY_H
 
-// Define the dynamic array structure
+// Define the StringArray structure
 typedef struct {
-    char **data;      // Array of string pointers (array of char* pointers)
-    int size;         // Number of strings in the array
-    int capacity;     // Total capacity of the array
+    char **data;
+    int size;
+    int capacity;
 } StringArray;
 
-// Function declarations
+// Declare functions (without implementations)
 void init(StringArray *arr);
 void append(StringArray *arr, const char *str);
 void freeArray(StringArray *arr);
 void printArray(const StringArray *arr);
 
-#endif // STRING_ARRAY_H
+#endif // DYNAMIC_ARRAY_H

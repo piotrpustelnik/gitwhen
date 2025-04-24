@@ -1,13 +1,7 @@
+#include "dynamic_array.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// Define the dynamic array structure
-typedef struct {
-    char **data;      // Array of string pointers (array of char* pointers)
-    int size;         // Number of strings in the array
-    int capacity;     // Total capacity of the array
-} StringArray;
 
 // Initialize the dynamic string array
 void init(StringArray *arr) {
