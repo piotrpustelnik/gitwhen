@@ -21,3 +21,6 @@ vgcore.*
 # Backup files
 *.bak
 *.tmp
+
+# Vscode
+.vscode/
