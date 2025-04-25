@@ -1,8 +1,0 @@
-==================== GIT LOG ====================
-Repository: /home/piotr/projects/gitwhen
-
-Commit     Date         Message                                           
---------------------------------------------------
-b9609ea 2025-04-22 fix: use cwd if --directory not provided
-67af9f2 2025-04-22 initial project commit
-====================================================
