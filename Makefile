@@ -7,6 +7,7 @@ TARGET = build/gitwhen
 all: $(TARGET)
 
 $(TARGET): $(SRCS)
+	mkdir -p build
 	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET)
 
 clean:

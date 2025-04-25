@@ -1,0 +1,20 @@
+name: Compile Check
+
+on:
+  push:        # Triggers on any push to any branch
+  pull_request:  # Optional: ensures PRs also trigger the check
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install build tools
+      run: sudo apt-get update && sudo apt-get install -y build-essential
+
+    - name: Compile project
+      run: |
+        make
