@@ -1,39 +1,44 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
-#define COLOR_RESET   "\x1b[0m"
-#define COLOR_HEADER  "\x1b[1;36m"
-#define COLOR_REPO    "\x1b[1;33m"
-#define COLOR_COMMIT  "\x1b[1;32m"
-#define COLOR_DATE    "\x1b[1;35m"
+#define COLOR_RESET "\x1b[0m"
+#define COLOR_HEADER "\x1b[1;36m"
+#define COLOR_REPO "\x1b[1;33m"
+#define COLOR_COMMIT "\x1b[1;32m"
+#define COLOR_DATE "\x1b[1;35m"
 #define COLOR_MESSAGE "\x1b[1;37m"
 
-void run_git_log(const char *repo_path, const char *start_date, const char *end_date) {
+void run_git_log(const char *repo_path, const char *start_date, const char *end_date)
+{
     static int header_printed = 0;
     char command[1024];
 
-    int written = snprintf(command, sizeof(command),
-        "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short",
-        repo_path);
-    if (written < 0 || written >= sizeof(command)) {
+    int written =
+        snprintf(command, sizeof(command),
+                 "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short", repo_path);
+    if (written < 0 || written >= sizeof(command))
+    {
         fprintf(stderr, "Command buffer overflow\n");
         return;
     }
 
-    if (start_date) {
-        written += snprintf(command + written, sizeof(command) - written,
-                            " --since=\"%s\"", start_date);
+    if (start_date)
+    {
+        written +=
+            snprintf(command + written, sizeof(command) - written, " --since=\"%s\"", start_date);
     }
 
-    if (end_date) {
-        written += snprintf(command + written, sizeof(command) - written,
-                            " --until=\"%s\"", end_date);
+    if (end_date)
+    {
+        written +=
+            snprintf(command + written, sizeof(command) - written, " --until=\"%s\"", end_date);
     }
 
     FILE *fp = popen(command, "r");
-    if (fp == NULL) {
+    if (fp == NULL)
+    {
         perror("Failed to run git log");
         return;
     }
@@ -42,10 +47,12 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
     char *output = NULL;
     size_t total_length = 0;
 
-    while (fgets(buffer, sizeof(buffer), fp)) {
+    while (fgets(buffer, sizeof(buffer), fp))
+    {
         size_t len = strlen(buffer);
         char *new_output = realloc(output, total_length + len + 1);
-        if (!new_output) {
+        if (!new_output)
+        {
             perror("Failed to allocate memory");
             free(output);
             pclose(fp);
@@ -59,12 +66,17 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
 
     pclose(fp);
 
-    if (output && total_length > 0) {
-        const char *hline = "┌──────────────────────────────────────────────────────────────────────────────┐";
-        const char *mline = "├──────────────────────────────────────────────────────────────────────────────┤";
-        const char *bline = "└──────────────────────────────────────────────────────────────────────────────┘";
+    if (output && total_length > 0)
+    {
+        const char *hline =
+            "┌──────────────────────────────────────────────────────────────────────────────┐";
+        const char *mline =
+            "├──────────────────────────────────────────────────────────────────────────────┤";
+        const char *bline =
+            "└──────────────────────────────────────────────────────────────────────────────┘";
 
-        if (!header_printed) {
+        if (!header_printed)
+        {
             printf("%s\n", hline);
             printf("│ %s%-76s%s │\n", COLOR_HEADER, "GIT LOG", COLOR_RESET);
             printf("%s\n", mline);
@@ -73,17 +85,20 @@ void run_git_log(const char *repo_path, const char *start_date, const char *end_
 
         printf("│ %sRepository:%s %-62s │\n", COLOR_REPO, COLOR_RESET, repo_path);
         printf("│ %-10s %-12s %-50s │\n", "Commit", "Date", "Message");
-        printf("│ %-10s %-12s %-50s │\n", "------", "----------", "--------------------------------------------------");
+        printf("│ %-10s %-12s %-50s │\n", "------", "----------",
+               "--------------------------------------------------");
 
         char *line = strtok(output, "\n");
-        while (line != NULL) {
+        while (line != NULL)
+        {
             char commit[16], date[16], message[256];
-            if (sscanf(line, "%15s %15s %[^\n]", commit, date, message) == 3) {
-                printf("│ %s%-10s%s %s%-12s%s %s%-50.50s%s │\n",
-                    COLOR_COMMIT, commit, COLOR_RESET,
-                    COLOR_DATE, date, COLOR_RESET,
-                    COLOR_MESSAGE, message, COLOR_RESET);
-            } else {
+            if (sscanf(line, "%15s %15s %[^\n]", commit, date, message) == 3)
+            {
+                printf("│ %s%-10s%s %s%-12s%s %s%-50.50s%s │\n", COLOR_COMMIT, commit, COLOR_RESET,
+                       COLOR_DATE, date, COLOR_RESET, COLOR_MESSAGE, message, COLOR_RESET);
+            }
+            else
+            {
                 printf("│ %s%-76s%s │\n", COLOR_MESSAGE, line, COLOR_RESET);
             }
             line = strtok(NULL, "\n");

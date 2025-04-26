@@ -3,7 +3,8 @@
 #define DYNAMIC_ARRAY_H
 
 // Define the StringArray structure
-typedef struct {
+typedef struct
+{
     char **data;
     int size;
     int capacity;
