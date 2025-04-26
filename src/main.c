@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
 {
     const char *start_date = NULL;
     const char *end_date = NULL;
+    const char *git_author = NULL;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
@@ -137,6 +138,14 @@ int main(int argc, char *argv[])
         }
     }
 
+    // If git author not provided, assume it is the
+    // author running the gitwhen command
+
+    if (git_author == NULL)
+    {
+        git_author = get_git_user_name();
+    }
+
     // Get current working directory
     char cwd[1024];
     if (getcwd(cwd, sizeof(cwd)) == NULL)
@@ -149,6 +158,7 @@ int main(int argc, char *argv[])
     printf("Start Date: %s\n", start_date);
     printf("End Date: %s\n", end_date);
     printf("Directory: %s\n", cwd);
+    printf("Git author: %s\n", git_author);
 
     // Find all Git repositories in the specified directory
 
@@ -172,24 +182,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Delete git.txt file if it exists
-    if (access("git.txt", F_OK) == 0)
-    {
-        if (remove("git.txt") != 0)
-        {
-            perror("Error deleting git.txt");
-            return 1;
-        }
-    }
-
     // For each repository found, print commits between the start and end date
     for (size_t i = 0; i < repos_arr->size; i++)
     {
         // printf("Processing repository: %s\n", repos_arr->data[i]);
-        run_git_log(repos_arr->data[i], start_date, end_date);
+        run_git_log(repos_arr->data[i], git_author, start_date, end_date);
     }
 
-    // Free allocated memory for dynamic array
+    // Free allocated resources
     freeArray(repos_arr);
+    free(git_author);
     return 0;
 }
