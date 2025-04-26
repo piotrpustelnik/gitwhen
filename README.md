@@ -17,8 +17,7 @@
 
 ### Prerequisites
 
-- A C compiler (e.g., GCC)
-- Git
+- Unix system including: `git` and `find` commands
 
 ### Installation
 
@@ -43,13 +42,16 @@ From source:
    ./build/gitwhen
    ```
 
+Download compiled binary from Github releases:
+* Currently supports Ubuntu x86
+
 
 ## Usage
 
-List commits from all your repositories in current working directory between dates:
+List commits from all your repositories made by you in current working directory between dates:
 `gitwhen 2025-04-20 2025-04-25`
 
-List commits from all your repositories in current working directory on particular day:
+List commits from all your repositories made by you in current working directory on particular day:
 `gitwhen 2025-04-20` 
 
 ## Contributing
