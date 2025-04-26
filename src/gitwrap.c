@@ -54,7 +54,7 @@ void run_git_log(const char *repo_path, const char *git_author, const char *star
 
     int written = snprintf(command, sizeof(command),
                            "git -C \"%s\" log --all --pretty=format:\"%%h %%ad %%s\" --date=short "
-                           "--author=\"%s\"",
+                           "--author=\"%s\" 2>/dev/null",
                            repo_path, git_author);
 
     if (written < 0 || written >= sizeof(command))
