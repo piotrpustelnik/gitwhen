@@ -85,9 +85,9 @@ char *format_iso_date_midnight_plus_one_day(const char *input)
 
 int main(int argc, char *argv[])
 {
-    const char *start_date = NULL;
-    const char *end_date = NULL;
-    const char *git_author = NULL;
+    char *start_date = NULL;
+    char *end_date = NULL;
+    char *git_author = NULL;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
@@ -190,7 +190,10 @@ int main(int argc, char *argv[])
     }
 
     // Free allocated resources
-    freeArray(repos_arr);
+    free(start_date);
+    free(end_date);
     free(git_author);
+    freeArray(repos_arr);
+    free(repos_arr);
     return 0;
 }
