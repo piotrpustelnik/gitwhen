@@ -53,7 +53,7 @@ void run_git_log(const char *repo_path, const char *git_author, const char *star
     char command[1024];
 
     int written = snprintf(command, sizeof(command),
-                           "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short "
+                           "git -C \"%s\" log --all --pretty=format:\"%%h %%ad %%s\" --date=short "
                            "--author=\"%s\"",
                            repo_path, git_author);
 
