@@ -10,14 +10,53 @@
 #define COLOR_DATE "\x1b[1;35m"
 #define COLOR_MESSAGE "\x1b[1;37m"
 
-void run_git_log(const char *repo_path, const char *start_date, const char *end_date)
+// Function to get the Git user name
+char *get_git_user_name()
+{
+    const char USER_NAME_BUFFER_SIZE = 100;
+    FILE *fp = popen("git config user.name", "r");
+    if (fp == NULL)
+    {
+        perror("Failed to run git config user.name");
+        return NULL;
+    }
+
+    // Allocate memory for the user name (buffer size)
+    char *user_name = malloc(USER_NAME_BUFFER_SIZE);
+    if (user_name == NULL)
+    {
+        perror("Failed to allocate memory for user name");
+        pclose(fp);
+        return NULL;
+    }
+
+    // Read the output into the user_name buffer
+    if (fgets(user_name, USER_NAME_BUFFER_SIZE, fp) == NULL)
+    {
+        fprintf(stderr, "Failed to get git user name\n");
+        free(user_name);
+        pclose(fp);
+        return NULL;
+    }
+
+    // Remove any trailing newline character
+    user_name[strcspn(user_name, "\n")] = '\0';
+
+    pclose(fp);
+    return user_name;
+}
+
+void run_git_log(const char *repo_path, const char *git_author, const char *start_date,
+                 const char *end_date)
 {
     static int header_printed = 0;
     char command[1024];
 
-    int written =
-        snprintf(command, sizeof(command),
-                 "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short", repo_path);
+    int written = snprintf(command, sizeof(command),
+                           "git -C \"%s\" log --pretty=format:\"%%h %%ad %%s\" --date=short "
+                           "--author=\"%s\"",
+                           repo_path, git_author);
+
     if (written < 0 || written >= sizeof(command))
     {
         fprintf(stderr, "Command buffer overflow\n");
