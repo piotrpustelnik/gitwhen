@@ -108,16 +108,16 @@ void run_git_log(const char *repo_path, const char *git_author, const char *star
     if (output && total_length > 0)
     {
         const char *hline =
-            "┌──────────────────────────────────────────────────────────────────────────────┐";
+            "┌────────────────────────────────────────────────────────────────────────────┐";
         const char *mline =
-            "├──────────────────────────────────────────────────────────────────────────────┤";
+            "├────────────────────────────────────────────────────────────────────────────┤";
         const char *bline =
-            "└──────────────────────────────────────────────────────────────────────────────┘";
+            "└────────────────────────────────────────────────────────────────────────────┘";
 
         if (!header_printed)
         {
             printf("%s\n", hline);
-            printf("│ %s%-76s%s │\n", COLOR_HEADER, "GIT LOG", COLOR_RESET);
+            printf("│ %s%-74s%s │\n", COLOR_HEADER, "GIT LOG", COLOR_RESET);
             printf("%s\n", mline);
             header_printed = 1;
         }
@@ -130,11 +130,38 @@ void run_git_log(const char *repo_path, const char *git_author, const char *star
         char *line = strtok(output, "\n");
         while (line != NULL)
         {
-            char commit[16], date[16], message[256];
+            char commit[16], date[16], message[1024];
             if (sscanf(line, "%15s %15s %[^\n]", commit, date, message) == 3)
             {
-                printf("│ %s%-10s%s %s%-12s%s %s%-50.50s%s │\n", COLOR_COMMIT, commit, COLOR_RESET,
-                       COLOR_DATE, date, COLOR_RESET, COLOR_MESSAGE, message, COLOR_RESET);
+                size_t msg_len = strlen(message);
+                size_t offset = 0;
+                int first_line = 1;
+                while (offset < msg_len)
+                {
+                    char chunk[51] = {0}; // 50 chars + null terminator
+                    size_t chunk_len = (msg_len - offset >= 50) ? 50 : msg_len - offset;
+                    strncpy(chunk, message + offset, chunk_len);
+                    chunk[chunk_len] = '\0';
+
+                    // Pad shorter lines manually
+                    char padded[51];
+                    snprintf(padded, sizeof(padded), "%-50s", chunk);
+
+                    if (first_line)
+                    {
+                        printf("│ %s%-10s%s %s%-12s%s %s%s%s │\n", COLOR_COMMIT, commit,
+                               COLOR_RESET, COLOR_DATE, date, COLOR_RESET, COLOR_MESSAGE, padded,
+                               COLOR_RESET);
+                        first_line = 0;
+                    }
+                    else
+                    {
+                        printf("│ %-10s %-12s %s%s%s │\n", "", "", COLOR_MESSAGE, padded,
+                               COLOR_RESET);
+                    }
+
+                    offset += chunk_len;
+                }
             }
             else
             {
