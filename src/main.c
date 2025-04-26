@@ -1,14 +1,15 @@
+#include "dynamic_array.h"
 #include "finder.h"
 #include "gitwrap.h"
-#include "dynamic_array.h"
 
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h> // For getcwd
 
-void print_usage(const char *program_name) {
+void print_usage(const char *program_name)
+{
     printf("Usage: %s <start_date> [end_date]\n", program_name);
     printf("Dates must be in YYYY-MM-DD format.\n");
 }
@@ -16,20 +17,23 @@ void print_usage(const char *program_name) {
 // Return pointer to ISO8601 formatted string date beginning at midnight
 // NULL pointer if parsing failed.
 // Caller needs to free from heap.
-char* format_iso_date_midnight(const char *input) {
+char *format_iso_date_midnight(const char *input)
+{
     struct tm tm = {0};
-    if (sscanf(input, "%4d-%2d-%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday) != 3) {
+    if (sscanf(input, "%4d-%2d-%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday) != 3)
+    {
         fprintf(stderr, "Date parsing failed\n");
         return NULL;
     }
 
-    tm.tm_year -= 1900;  // Adjust year to tm_year format
-    tm.tm_mon -= 1;      // Adjust month to tm_mon format (0-11)
+    tm.tm_year -= 1900; // Adjust year to tm_year format
+    tm.tm_mon -= 1;     // Adjust month to tm_mon format (0-11)
 
     // Allocate memory on the heap for iso_date_time
-    char *iso_date_time = (char *)malloc(20 * sizeof(char));  // Format: YYYY-MM-DDTHH:MM:SS
+    char *iso_date_time = (char *)malloc(20 * sizeof(char)); // Format: YYYY-MM-DDTHH:MM:SS
 
-    if (iso_date_time == NULL) {
+    if (iso_date_time == NULL)
+    {
         fprintf(stderr, "Memory allocation failed\n");
         return NULL;
     }
@@ -37,34 +41,38 @@ char* format_iso_date_midnight(const char *input) {
     // Create the ISO 8601 formatted string (UTC time for simplicity)
     strftime(iso_date_time, 20, "%Y-%m-%dT%H:%M:%S", &tm);
 
-    return iso_date_time;  // Return pointer to the formatted string
+    return iso_date_time; // Return pointer to the formatted string
 }
 
 // Return pointer to ISO8601 formatted input date + one day
 // NULL pointer if parsing failed.
 // Caller needs to free from heap.
-char* format_iso_date_midnight_plus_one_day(const char *input) {
+char *format_iso_date_midnight_plus_one_day(const char *input)
+{
     struct tm tm = {0};
-    if (sscanf(input, "%4d-%2d-%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday) != 3) {
+    if (sscanf(input, "%4d-%2d-%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday) != 3)
+    {
         fprintf(stderr, "Date parsing failed\n");
         return NULL;
     }
 
-    tm.tm_year -= 1900;  // tm_year is years since 1900
-    tm.tm_mon -= 1;      // tm_mon is 0-based
+    tm.tm_year -= 1900; // tm_year is years since 1900
+    tm.tm_mon -= 1;     // tm_mon is 0-based
 
     // Add one day
     tm.tm_mday += 1;
 
     // Normalize the date
-    if (mktime(&tm) == -1) {
+    if (mktime(&tm) == -1)
+    {
         fprintf(stderr, "Date normalization failed\n");
         return NULL;
     }
 
     // Allocate space for ISO 8601 date-time string
-    char *iso_date_time = malloc(20);  // "YYYY-MM-DDTHH:MM:SS"
-    if (!iso_date_time) {
+    char *iso_date_time = malloc(20); // "YYYY-MM-DDTHH:MM:SS"
+    if (!iso_date_time)
+    {
         fprintf(stderr, "Memory allocation failed\n");
         return NULL;
     }
@@ -75,17 +83,24 @@ char* format_iso_date_midnight_plus_one_day(const char *input) {
     return iso_date_time;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     const char *start_date = NULL;
     const char *end_date = NULL;
 
     // Parse command line arguments
-    for (int i = 1; i < argc; i++) {
-        if (start_date == NULL) {
+    for (int i = 1; i < argc; i++)
+    {
+        if (start_date == NULL)
+        {
             start_date = argv[i];
-        } else if (end_date == NULL) {
+        }
+        else if (end_date == NULL)
+        {
             end_date = argv[i];
-        } else {
+        }
+        else
+        {
             fprintf(stderr, "Error: Too many arguments\n");
             print_usage(argv[0]);
             return 1;
@@ -93,36 +108,39 @@ int main(int argc, char *argv[]) {
     }
 
     // Check if start_date is provided
-    if (start_date == NULL) {
+    if (start_date == NULL)
+    {
         fprintf(stderr, "Error: Missing start date\n");
         print_usage(argv[0]);
         return 1;
     }
 
-
     start_date = format_iso_date_midnight(start_date);
-    if (start_date == NULL){
+    if (start_date == NULL)
+    {
         fprintf(stderr, "Error: Invalid start date format. Expected YYYY-MM-DD.\n");
         return 1;
     }
 
-
     // If end_date is not provided, use start_date as end_date
-    if (end_date == NULL) {
+    if (end_date == NULL)
+    {
         end_date = format_iso_date_midnight_plus_one_day(start_date);
-    }else{
+    }
+    else
+    {
         end_date = format_iso_date_midnight_plus_one_day(end_date);
-        if (end_date == NULL){
+        if (end_date == NULL)
+        {
             fprintf(stderr, "Error: Invalid end date format. Expected YYYY-MM-DD.\n");
             return 1;
-
         }
     }
 
-
     // Get current working directory
     char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    if (getcwd(cwd, sizeof(cwd)) == NULL)
+    {
         perror("getcwd");
         return 1;
     }
